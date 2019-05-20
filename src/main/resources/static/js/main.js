@@ -1,8 +1,8 @@
-var clientsApi = Vue.resource('clients{/id}');
+const clientsApi = Vue.resource('clients{/uuid}');
 
-function getUid(list, id) {
-    for (var i = 0; i < list.length; i++) {
-        if (list[i].id === id) {
+function getUuid(list, uuid) {
+    for (let i = 0; i < list.length; i++) {
+        if (list[i].uuid === uuid) {
             return i;
         }
     }
@@ -16,35 +16,35 @@ Vue.component('clients-form', {
         return {
             name: '',
             balance: '',
-            id: ''
+            uuid: ''
         }
     },
     watch: {
-        clientInput: function(input) {
+        clientInput: function(input, oldInput) {
             this.name= input.name;
             this.balance = input.balance;
-            this.id = input.id;
+            this.uuid = input.uuid;
         }
     },
     template:
         '<div>' +
         '   <input type="text" placeholder="Имя клиента" v-model="name"/>' +
         '   <input type="text" placeholder="Баланс клиента" v-model="balance"/>' +
-        '   <input type="button" value="Сохранить" @click="save"/>' +
+        '   <input type="button" value="Сохранить" @click="saveItem"/>' +
         '</div>',
     methods: {
-        save: function () {
-            var input = {
+        saveItem: function () {
+            const input = {
                 name: this.name,
                 balance: this.balance
             };
 
-            if (this.id) {
-                clientsApi.update({id: this.id}, input).then(result =>
+            if (this.uuid) {
+                clientsApi.update({uuid: this.uuid}, input).then(result =>
                     result.json().then(data => {
-                        const index = getUid(this.clients, data.id);
+                        const index = getUuid(this.clients, data.uuid);
                         this.clients.splice(index, 1, data);
-                        this.id = '';
+                        this.uuid = '';
                     })
                 )
             } else {
@@ -65,18 +65,18 @@ Vue.component('clients-row', {
     props: ['client', 'clients', 'editClient'],
     template:
         '<div >' +
-        '   {{ client.name }} {{ client.balance }}' +
+        '   {{ client.uuid}} {{ client.name }} {{ client.balance }}' +
         '   <span style="position: absolute; right: 0px;">' +
-        '       <input type="button" value="Изменить" @click="edit"/>' +
-        '       <input type="button" value="Удалить" @click="del"/>' +
+        '       <input type="button" value="Изменить" @click="editItem"/>' +
+        '       <input type="button" value="Удалить" @click="deleteItem"/>' +
         '   </span>' +
         '</div>',
     methods: {
-        edit: function() {
+        editItem: function() {
             this.editClient(this.client);
         },
-        del: function() {
-            clientsApi.remove({id: this.client.uid}).then(result => {
+        deleteItem: function() {
+            clientsApi.remove({uuid: this.client.uuid}).then(result => {
                 if (result.ok) {
                     this.clients.splice(this.clients.indexOf(this.client), 1);
                 }
@@ -99,7 +99,7 @@ Vue.component('clients-list', {
         '       :clientInput="client">' +
         '   </clients-form>' +
         '   <clients-row v-for="client in clients" ' +
-        '       :key="client.uid" ' +
+        '       :key="client.uuid" ' +
         '       :client="client" ' +
         '       :editClient="editClient" ' +
         '       :clients="clients">' +
@@ -120,7 +120,7 @@ Vue.component('clients-list', {
     }
 });
 
-var clientsApp = new Vue({
+const app = new Vue({
     el: '#clients',
     template: '<clients-list :clients="clients"/>',
     data: {
