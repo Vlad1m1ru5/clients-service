@@ -37,8 +37,8 @@ public class ClientsController {
     }
 
     @PutMapping("{uuid}")
-    public Client editClient(@PathVariable("uuid") Client clientFromRepo, Client client) {
-        BeanUtils.copyProperties(clientFromRepo, client, "uuid");
+    public Client editClient(@PathVariable("uuid") Client clientFromRepo, @RequestBody Client client) {
+        BeanUtils.copyProperties(client, clientFromRepo, "uuid");
         return clientRepository.save(clientFromRepo);
     }
 
